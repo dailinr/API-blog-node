@@ -6,6 +6,8 @@ const ArticuloControlador = require("../controladores/articulo");
 
 // Rutas de prueba
 router.get("/ruta-de-prueba", ArticuloControlador.prueba); // parametros: nombre de url, el objeto del controlador con el metodo prueba
-router.get("/curso", ArticuloControlador.curso);
+
+// Rutas utiles de nuestra api
+router.post("/crear", ArticuloControlador.crear); // metodo post porque se está enviando informacion
 
 module.exports = router; // exportamos el objeto router con las rutas de prueba 

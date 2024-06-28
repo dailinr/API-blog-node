@@ -16,8 +16,8 @@ const puerto = 1024;
 app.use(cors()); // se ejecuta el cors antes de que se ejecute cualquier ruta
 
 // Convertir body a objeto js
-app.use(express.json());  // parsea automaticamente los datos enviados por POST a objetos javascript
-
+app.use(express.json());  // parsea automaticamente los datos enviados por POST a objetos javascript - recibir datos con content type app/json
+app.use(express.urlencoded({extended:true})); // puedo recibir datos en formato form-urlencoded (para formularios)
 
 // RUTAS - para visualizar el resultado en el navegador
 const rutas_articulo = require("./rutas/articulo");
