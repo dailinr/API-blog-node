@@ -16,10 +16,10 @@ const conexion = async() => {
 
     } catch(error){
         console.log(error); // muestra un posible error
-        throw new Error("No se ha podido conectar a la base de datos")
+        throw new Error("No se ha podido conectar a la base de datos");
     }
 }
 
 module.exports = {
     conexion // exporta la conexion para poder usarla en otros archivos
-}
+};

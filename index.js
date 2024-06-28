@@ -4,13 +4,13 @@ const cors = require("cors");
 
 console.log("App node arrancada");
 
-
+14188
 // conectar a la base de datos
 conexion();
 
 // Crear servidor Node
 const app = express();
-const puerto = 3900;
+const puerto = 1024;
 
 // Configurar cors
 app.use(cors()); // se ejecuta el cors antes de que se ejecute cualquier ruta
@@ -18,7 +18,23 @@ app.use(cors()); // se ejecuta el cors antes de que se ejecute cualquier ruta
 // Convertir body a objeto js
 app.use(express.json());  // parsea automaticamente los datos enviados por POST a objetos javascript
 
-// Crear Rutas
+
+// RUTAS - para visualizar el resultado en el navegador
+const rutas_articulo = require("./rutas/articulo");
+
+// cargar las rutas
+app.use("/api", rutas_articulo); // parametros: todas las rutas se cargaran en /api, /api/ruta-articulo
+
+// Rutas prueba hardcodeadas
+
+app.get("/", (req, res) => { // parametros: nombre de la ruta, funcion callback del endpoint (require, respuesta)
+    
+    console.log("se ha ejecutado el endpoint  / ");
+
+    return res.status(200).send(`
+        <h1>Bienvenido</h1>
+    `);
+});
 
 // Crear servidor y escuchar peticiones http
 app.listen(puerto, () => { // se pasa un puerto como parametro y funcion verifique q el servidor corra
