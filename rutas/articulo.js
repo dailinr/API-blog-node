@@ -9,5 +9,6 @@ router.get("/ruta-de-prueba", ArticuloControlador.prueba); // parametros: nombre
 
 // Rutas utiles de nuestra api
 router.post("/crear", ArticuloControlador.crear); // metodo post porque se está enviando informacion
+router.get("/listar/:recientes?", ArticuloControlador.listar); // (:) parametro recientes es (?) opcional
 
 module.exports = router; // exportamos el objeto router con las rutas de prueba 

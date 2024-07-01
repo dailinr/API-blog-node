@@ -38,5 +38,5 @@ app.get("/", (req, res) => { // parametros: nombre de la ruta, funcion callback 
 
 // Crear servidor y escuchar peticiones http
 app.listen(puerto, () => { // se pasa un puerto como parametro y funcion verifique q el servidor corra
-    console.log("Servidor corriendo en el puerto: "+puerto);
+    console.log("Servidor corriendo en el puerto: " + puerto);
 });
