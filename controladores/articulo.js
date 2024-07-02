@@ -4,6 +4,7 @@
 const Articulo = require("../modelos/Articulo"); // importamos el doc articulo de nuestro modelo db
 const { validarArticulo } = require("./../helpers/validarArticulo");
 const fs = require("fs"); // libreria para borrar archivo
+const path = require("path"); // me permite coger un archivo y poder enviarlo
 
 // trabajaremos con programacion funcional (callback)
 const prueba = (req, res) => {
@@ -339,6 +340,31 @@ const subirImagen = async (req, res) => {
 
 }
 
+// poder ver imagen de cada articulo
+const verImagen = (req, res) => {
+    let fichero =  req.params.fichero; 
+    let rutaFisica = "./imagenes/articulos/" + fichero; 
+
+    // Verificar que el id sea válido y tenga acceso a ese fichero
+    fs.stat(rutaFisica, (error, existe) => {
+        
+        if (existe) {
+            // devolvermos como respuesta un archivo como tal
+            return res.sendFile(path.resolve(rutaFisica));
+        }
+        else{
+            // si hay algun error 
+            return res.status(404).json({
+                status: "error",
+                mensaje: "La imagen no existe",
+                existe,
+                fichero, 
+                rutaFisica
+            });
+        }
+    })
+}
+
 
 module.exports = {
     prueba,
@@ -347,5 +373,6 @@ module.exports = {
     obtener,
     borrar,
     editar,
-    subirImagen
+    subirImagen,
+    verImagen
 }
