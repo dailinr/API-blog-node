@@ -1,8 +1,9 @@
 
 // Aqui van todos los metodos y funcionalidades de nuestra api
 
-const validator = require("validator");
 const Articulo = require("../modelos/Articulo"); // importamos el doc articulo de nuestro modelo db
+const {validarArticulo} = require("./../helpers/validarArticulo");
+const fs = require("fs"); // libreria para borrar archivo
 
 // trabajaremos con programacion funcional (callback)
 const prueba = (req, res) => {
@@ -18,16 +19,9 @@ const crear = async (req, res) => {
     // Recoger los parametros por post a guardar
     let parametros = req.body;
 
-    // Validar datos
+    // validar datos
     try{
-        let valLongTitulo = validator.isLength(parametros.titulo, {min: 5, max: undefined}); // valiudamos que tenga una longitud entre 5 - sin limite
-        let validarTitulo = !validator.isEmpty(parametros.titulo) && valLongTitulo; // validar si el titulo no está vacio
-                             
-        let validarContenido = !validator.isEmpty(parametros.contenido);
-
-        if(!validarTitulo || !validarContenido){
-            throw new Error("No se ha validado la información !!"); // se lanzaria una excepción
-        }
+        validarArticulo(parametros);
 
     }catch(error){
         return res.status(400).json({
@@ -191,10 +185,129 @@ const borrar = async (req, res) => {
     }
 }
 
+// Metodo para actualizar un articulo 
+const editar = async (req, res) => {
+
+    try{
+        // Recoger un id por la url
+        const id = req.params.id;
+
+        // Verificar que el id sea válido
+        if (!id || id.length !== 24) { 
+            return res.status(400).json({
+                status: "error",
+                mensaje: "ID no válido"
+            });
+        }
+
+        // Recoger datos del body (enviados por form)
+        let parametros = req.body;
+
+        // validar datos
+        try{
+            validarArticulo(parametros);
+
+        }catch(error){
+            return res.status(400).json({
+                status: "error",
+                mensaje: "Faltan datos por enviar",
+            });
+        }
+        
+        // Buscar y actualizar articulos (todas las propiedades de la base de datos)
+        const articuloActualizado = await Articulo.findOneAndUpdate(
+            { _id: id },
+            parametros,
+            {new: true}
+        );
+
+        // Verificar si el artículo fue actualizado
+        if (!articuloActualizado) {
+            return res.status(404).json({
+                status: "error",
+                mensaje: "Error al actualizar el artículo"
+            });
+        }
+
+        // Devolver resultado
+        return res.status(200).json({
+            status: "success",
+            articulo: articuloActualizado,
+            mensaje: "Articulo actualizado exitosamente"
+        });
+
+
+    } catch(error) {
+        // Manejar errores generales, incluyendo errores de base de datos
+        return res.status(500).json({
+            status: "error",
+            mensaje: "Error al buscar el articulo"
+        }); 
+    }
+}
+
+// Subir ficheros e imagenes del articulo
+const subirImagen = (req, res) => {
+
+    // Configurar multer (rutas - articulo.js)
+
+    // Recoger el fichero de imagen subido
+    if(!req.file && !req.files){ // comprobar antes que se mande un archivo 
+
+        return res.status(404).json({
+            status: "error",
+            mensaje: "No se ha subido ninguna imagen"
+        });
+    }
+
+    // Conseguir el nombre del archivo
+    let archivo = req.file.originalname;
+
+    // Conseguir la extensión del archivo
+    let archivo_split = archivo.split('\.'); // split es un metodo que te permite cortar un STRING en varias partes
+    let extension = archivo_split[1]; // segundo elemento del arreglo (la extension)
+
+    // Comprobar extensión correcta
+    if(extension != "png" && extension != "jpg" && 
+        extension != "jpeg" && extension != "gif"){
+
+        // borrar archivo sino es imagen
+        fs.unlink(req.file.path, (error)  => {
+            
+            if (error) {
+                // Si hay un error al intentar eliminar el archivo, se devuelve un error.
+                return res.status(500).json({
+                    status: "error",
+                    mensaje: "Error al eliminar la imagen"
+                });
+            }
+
+            return res.status(400).json({
+                status: "error",
+                mensaje: "Imagen invalida, eliminada con exito"
+            });
+        });
+
+    }else{
+        // Si todo va bien, actualizar el articulo
+
+        // Devolver una respuesta
+        return res.status(200).json({
+            status: "success",
+            files: req.file,
+            extension: extension
+        })
+    }
+    
+
+}
+
 module.exports = {
     prueba,
     crear,
     listar,
     obtener,
-    borrar
+    borrar,
+    editar,
+    subirImagen
 }
