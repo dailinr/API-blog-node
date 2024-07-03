@@ -365,6 +365,44 @@ const verImagen = (req, res) => {
     })
 }
 
+// Buscar en nuestros articulos de la base de datos
+const buscar = (req, res) => {
+    // Sacar el string de busqueda
+    let busqueda = req.params.busqueda;
+
+    // Find con OR a db
+    Articulo.find({
+        // Ejecutar consulta
+        // select * fron articulos where titulo = x or titulo = y
+        "$or": [
+            // si el titulo incluye el string que tiene "busqueda"
+            { titulo: { "$regex": busqueda, "$options": "i" } }, // $regex para incluir una expresion regular
+            { contenido: { "$regex": busqueda, "$options": "i" } },
+        ]
+    })
+    .sort({fecha: -1})  // ordenamos ascendentemente 
+    .then(articulosEncontrados => {
+        if(!articulosEncontrados || articulosEncontrados.length <= 0){
+            return res.status(404).json({
+                status: "error",
+                mensaje: "no se ha encontrado ninguna similitud"
+            })
+        }
+        // Si no hay errores devolver resultado
+        return res.status(200).json({
+            status: "success",
+            articulos: articulosEncontrados
+        })
+    })
+    .catch(error => {
+        console.error(error);
+        return res.status(500).json({
+            status: "error",
+            mensaje: "Error al realizar la consulta"
+        });
+    });
+
+}
 
 module.exports = {
     prueba,
@@ -374,5 +412,6 @@ module.exports = {
     borrar,
     editar,
     subirImagen,
-    verImagen
+    verImagen,
+    buscar
 }

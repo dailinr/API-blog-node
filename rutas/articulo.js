@@ -31,5 +31,7 @@ router.delete("/articulo/:id", ArticuloControlador.borrar); // borrar un articul
 router.put("/articulo/:id", ArticuloControlador.editar); // actulizar las propiedades del articulo
 router.post("/subir-imagen/:id", [subidas.single("file0")], ArticuloControlador.subirImagen); // [un arreglo de varios] , single: se va a subir una sola, nombre d subida del campodb 
 router.get("/ver-imagen/:fichero", ArticuloControlador.verImagen); // parametro: el url del fichero de la imagen
+router.get("/buscar/:busqueda", ArticuloControlador.buscar);
+
 
 module.exports = router; // exportamos el objeto router con las rutas de prueba 
