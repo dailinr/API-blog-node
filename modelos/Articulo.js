@@ -11,9 +11,16 @@ const ArticulosSchema = Schema({ // parametro: esquema de la db (todos los docs 
         type: String,
         required: true, 
     },
+    etiqueta: {
+        type: String,
+        required: true,
+    },
     fecha: {
         type: Date,
-        default: Date.now, // por defecto será la fecha actual
+        default: () => {
+            const now = new Date();
+            return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        },
         // no le especificamos si es requerida porque por defecto tendrá ya una
     },
     imagen: {
