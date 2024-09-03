@@ -378,6 +378,7 @@ const buscar = (req, res) => {
             // si el titulo incluye el string que tiene "busqueda"
             { titulo: { "$regex": busqueda, "$options": "i" } }, // $regex para incluir una expresion regular
             { contenido: { "$regex": busqueda, "$options": "i" } },
+            { etiqueta: { "$regex": busqueda, "$options": "i" } },
         ]
     })
     .sort({fecha: -1})  // ordenamos ascendentemente 
