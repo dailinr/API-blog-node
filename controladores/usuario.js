@@ -84,8 +84,74 @@ const registrar = async (req, res) => {
 
 }
 
+// Autenticacion de usuario
+const login = async (req, res) => {
+
+    // Recoger parametros del body
+    let params = req.body;
+
+    if(!params.email || !params.password){
+        
+        return res.status(400).send({
+            status: "error",
+            mensaje: "No se recibieron los datos del usuario correctamente",
+        });
+    }
+
+    try{
+        // Buscar en la DB si existe el email usuario
+        let user = await User.findOne({email: params.email}); //.select("password", 0);  select para impedir que se envien los datos de ese campo 
+
+        // Verificar si el usuario existe
+        if (!user) {
+            return res.status(404).send({
+                status: "error", 
+                mensaje: "El usuario no existe o no se pudo encontrar"
+            });
+        }
+
+        // Comprobar su contraseña es correcta (parametro enviado desde form, hash guardado en DB)
+        const pwd = bcrypt.compareSync(params.password, user.password);
+
+        // Si la contraseña no coincide
+        if(!pwd){
+            return res.status(400).send({
+                status: "error",
+                mensaje: "La contraseña es invalida"
+            });
+        }
+
+        // conseguir el token
+        const token = false;
+
+
+        // Eliminar password del objeto
+
+        // Devolver datos de usuario
+        return res.status(200).send({
+            status: "success",
+            mensaje: "Usuario identificado correctamente!! ",
+            user: {
+                id: user._id,
+                name: user.name,
+                nick: user.nick
+            },
+        });
+
+    }
+    catch(error){
+        
+        return res.status(500).send({
+            status: "error", 
+            mensaje: "Error en el servidor"
+        });
+    }
+    
+}
+
 // Exportar acciones
 module.exports = {
     pruebaUsuario, 
-    registrar
+    registrar,
+    login
 }
