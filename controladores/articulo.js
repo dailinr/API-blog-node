@@ -75,7 +75,7 @@ const listar = async (req, res) => {
         // Ejecutar la consulta
         const articulos = await query.exec(); // Ejecutar la consulta de manera asíncrona
 
-        console.log("longitud: " + articulos.length);
+        // console.log("longitud: " + articulos.length);
 
         if (!articulos || articulos.length === 0) { // Si no hay artículos encontrados
 

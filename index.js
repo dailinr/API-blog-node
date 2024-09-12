@@ -21,12 +21,13 @@ app.use(express.urlencoded({extended:true})); // puedo recibir datos en formato 
 
 // RUTAS - para visualizar el resultado en el navegador
 const rutas_articulo = require("./rutas/articulo");
+const rutas_user = require("./rutas/usuario")
 
 // cargar las rutas
 app.use("/api", rutas_articulo); // parametros: todas las rutas se cargaran en /api, /api/ruta-articulo
+app.use("/api", rutas_user);
 
 // Rutas prueba hardcodeadas
-
 app.get("/", (req, res) => { // parametros: nombre de la ruta, funcion callback del endpoint (require, respuesta)
     
     console.log("se ha ejecutado el endpoint  / ");
