@@ -25,17 +25,9 @@ const rutas_user = require("./rutas/usuario")
 
 // cargar las rutas
 app.use("/api", rutas_articulo); // parametros: todas las rutas se cargaran en /api, /api/ruta-articulo
-app.use("/api", rutas_user);
+app.use("/api/usuario", rutas_user);
 
 // Rutas prueba hardcodeadas
-app.get("/", (req, res) => { // parametros: nombre de la ruta, funcion callback del endpoint (require, respuesta)
-    
-    console.log("se ha ejecutado el endpoint  / ");
-
-    return res.status(200).send(`
-        <h1>Bienvenido</h1>
-    `);
-});
 
 // Crear servidor y escuchar peticiones http
 app.listen(puerto, () => { // se pasa un puerto como parametro y funcion verifique q el servidor corra
