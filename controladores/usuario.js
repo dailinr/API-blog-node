@@ -1,5 +1,6 @@
 // Importar dependencias y modulos
 const bcrypt = require("bcrypt");
+const mongoosePaginate = require("mongoose-paginate-v2");
 
 // Importar modelo DB
 const User = require("../modelos/Usuario");
@@ -60,9 +61,9 @@ const registrar = async (req, res) => {
 
         // Guardar usuario en base de datos
         try {
-            userStore = userToSave.save(); // guarda coleccion en db
+            let userStored = await userToSave.save(); // guarda coleccion en db
 
-            if(!userStore){
+            if(!userStored){
                 return res.status(500).json({  status: "error",  message: "Error en la peticion de usuarios duplicados", error: error.message  });
             }
 
@@ -70,7 +71,7 @@ const registrar = async (req, res) => {
             return res.status(200).json({
                 status: "success",
                 message: "Usuario registrado correctamente ",
-                user: userStore
+                user: userStored
             });
         } 
         catch{
@@ -153,9 +154,96 @@ const login = async (req, res) => {
     
 }
 
+// Datos del perfil del usuario
+const perfil = async (req, res) => {
+
+    // Recibir parametro del id del usuario url
+    const id = req.params.id;
+
+    try{
+        // Consulta para sacar los datos del usuario
+        const userPerfil = await User.findById(id).select({password: 0, role: 0});
+
+        if (!userPerfil) {
+            return res.status(404).send({
+                status: "error", 
+                mensaje: "El usuario no existe o no se pudo encontrar"
+            });
+        }
+
+        // Devolver el resultado
+        return res.status(200).send({
+            status: "success",
+            user: userPerfil
+        });
+
+    }
+    catch(error){
+        return res.status(400).send({
+            status: "error",
+            mensaje: "Error en el servidor"
+        });
+    }
+}
+
+// Listado de usuarios registrados en la plataforma
+const list = async (req, res) => {
+    
+    // Definir la pagina por defecto
+    let page = 1;
+
+    // Verificar si hay un valor de página en los parámetros
+    if(req.params.page){
+        page = parseInt(req.params.page);
+    }
+
+    // Número de elementos por página -
+    let itemsForPage = 5;
+    
+    try{
+        // Obtener los usuarios de la DB
+        let users = await User.paginate({}, {
+            page: page,
+            limit: itemsForPage,
+            sort: { _id: -1 } // Orden descendente por _id
+        });
+
+        // Comprobar si hay usuarios
+        if(!users || users.docs.length === 0){
+            return res.status(404).send({
+                status: "error",
+                mensaje: "No se encontraron usuarios"
+            });
+        }
+    
+        // Devolver el resultado
+        return res.status(200).send({
+            status: "success", 
+            mensaje: "listado de usuarios",
+            users: users.docs,
+            page: users.page,
+            itemsForPage: users.limit,
+            total: users.totalDocs,
+            pages: users.totalPages,
+        });
+    }
+    catch(error){
+
+        return res.status(500).send({
+            status: "error",
+            mensaje: "Error en la consulta",
+            error
+        });
+    }
+
+    
+}
+
 // Exportar acciones
 module.exports = {
     pruebaUsuario, 
     registrar,
-    login
+    login,
+    perfil,
+    list
 }
