@@ -239,11 +239,94 @@ const list = async (req, res) => {
     
 }
 
+const update = async (req, res) => {
+    // Recoger info del usuario a actualizar
+    let userIdentify = req.user;
+    let userToUpdate = req.body;
+
+    // Eliminar campos sobrantes
+    delete userToUpdate.iat;
+    delete userToUpdate.exp;
+    delete userToUpdate.role;
+    delete userToUpdate.image;
+
+    // Comprobar si el usuario ya existe
+    try{
+        const users = await User.find({ 
+            $or: [ 
+                // si coinciden alguno de estos datos si ya existen en la DB..
+                { email: { $regex: new RegExp(`^${userToUpdate.email}$`, 'i') } },
+                { nick: { $regex: new RegExp(`^${userToUpdate.nick}$`, 'i') } }
+            ]
+        });
+
+        let userIsset = false;
+
+        users.forEach((user) => {
+            // si el id el user del modelo es distinto a id del toker user
+            if(user && user._id != userIdentify.id){
+                userIsset = true;
+            }
+        });
+
+        if(userIsset){ 
+            return res.status(200).json({
+                status: "success",
+                message: "El usuario ya existe"
+            });
+        } 
+        
+        // Cifrar la contraseña
+        if(userToUpdate.password){
+            let pwd = await bcrypt.hash(userToUpdate.password, 10); // la contraseña a cifrar, numero de incriptaciones, 
+            userToUpdate.password = pwd; // actualizo la contraseña a la ya cifrada (hash)
+        }
+
+        // Buscar y actualizar (id del user a actualizar, objeto a actualizar, parametro para q actualize en la consulta)
+        try {
+            let userUpdated = await User.findByIdAndUpdate(userIdentify.id, userToUpdate, {new: true});
+ 
+            // Dar una respuesta de exito
+            return res.status(200).send({
+                status: "success",
+                mensaje: "Datos del usuario actualizados correctamente",
+                user: userUpdated
+            });
+        }
+        catch(error){
+            return res.status(500).json({
+                status: "error",
+                message: "Error al actualizar los datos del usuario"
+            });
+        }
+        
+    } 
+    catch(error){
+        
+        return res.status(500).json({
+            status: "error",
+            message: "Error en la peticion de usuarios duplicados",
+            error: error.message
+        });
+    }
+}
+
+const upload = (req, res) => {
+
+    return res.status(200).send({
+        status: "success",
+        message: "Subida de imagenes",
+        user: req.user
+    });
+}
+
 // Exportar acciones
 module.exports = {
     pruebaUsuario, 
     registrar,
     login,
     perfil,
-    list
+    list,
+    update,
+    upload
 }
