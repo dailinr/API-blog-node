@@ -34,6 +34,7 @@ const crear = async (req, res) => {
     // Crear el objeto a guardar y asignar valores a objetos basado en el modelo db 
     const articulo = new Articulo(parametros);  // automatico
     // articulo.titulo = parametros.titulo; -- manual
+    articulo.user = req.user.id;
 
 
     try {
@@ -160,7 +161,9 @@ const borrar = async (req, res) => {
         }
 
         // Buscar el articulo por id y borrarlo
-        let articuloBorrado = await Articulo.findByIdAndDelete({ _id: id }); // _id (db) sea igual id de la ruta controlador
+        // let articuloBorrado = await Articulo.findByIdAndDelete({"user": req.user.id,  _id: id }); // _id (db) sea igual id de la ruta controlador
+        let articuloBorrado = await Articulo.findOneAndDelete({ "user": req.user.id, _id: id }); // _id (db) sea igual id de la ruta controlador y comprueba que el user del creador sea el mismo autenticado
+
 
         // Verificar si el artículo fue encontrado
         if (!articuloBorrado) {
@@ -177,7 +180,8 @@ const borrar = async (req, res) => {
             mensaje: "Articulo borrado exitosamente"
         });
 
-    } catch (error) {
+    } 
+    catch (error) {
         // Manejar errores generales, incluyendo errores de base de datos
         return res.status(500).json({
             status: "error",
@@ -405,6 +409,56 @@ const buscar = (req, res) => {
 
 }
 
+const articulosUser = async (req, res) => {
+
+    // Sacar el id de usuario (me llega por la url)
+    const userId = req.params.id;
+
+    // Controlar la pagina
+    let page = 1;
+
+    if(req.params.page) page = req.params.page;
+
+    const itemsPerPage = 5; // 5 usuarios por pagina
+
+    // Find, populate, ordenar, paginar
+    try{
+        let artUser = await Articulo.paginate(
+            { "user": userId },  // Filtro para buscar artículos del usuario
+            {
+                sort: { fecha: -1 }, // Ordenar por fecha descendente
+                populate: { path: "user", select: '-password -__v -role' }, 
+                page: page,           // Número de página
+                limit: itemsPerPage    
+            }
+        );
+
+        if(!artUser || artUser.totalDocs <= 0){
+            return res.status(404).send({
+                status: "error",
+                message: "No hay publicaciones por mostrar de este usuario"
+            });
+        }
+    
+        // Devolver respuesta 
+        return res.status(200).json({
+            status: "success",
+            message: "Publicaciones del perfil de un usuario",
+            page: artUser.page,
+            total: artUser.totalDocs,
+            pages: artUser.totalPages,
+            artUser
+        }); 
+    }
+    catch(error){
+        return res.status(400).send({
+            status: "error",
+            message: "Hubo un error al obtener los articulos del usuario"
+        });
+    }
+    
+}
+
 module.exports = {
     prueba,
     crear,
@@ -414,5 +468,6 @@ module.exports = {
     editar,
     subirImagen,
     verImagen,
-    buscar
+    buscar,
+    articulosUser
 }

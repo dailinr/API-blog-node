@@ -286,7 +286,7 @@ const update = async (req, res) => {
 
         // Buscar y actualizar (id del user a actualizar, objeto a actualizar, parametro para q actualize en la consulta)
         try {
-            let userUpdated = await User.findByIdAndUpdate(userIdentify.id, userToUpdate, {new: true});
+            let userUpdated = await User.findByIdAndUpdate({_id: userIdentify.id}, userToUpdate, {new: true});
  
             // Dar una respuesta de exito
             return res.status(200).send({
