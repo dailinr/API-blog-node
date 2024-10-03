@@ -254,94 +254,55 @@ const editar = async (req, res) => {
 // Subir ficheros e imagenes del articulo
 const subirImagen = async (req, res) => {
 
-    // Configurar multer (rutas - articulo.js)
+    // sacar id del articulo
+    const articuloId = req.params.id;
 
-    // Recoger el fichero de imagen subido
-    if (!req.file && !req.files) { // comprobar antes que se mande un archivo 
-
-        return res.status(404).json({
+    // Recoger el fichero de imagenes y comprobar que existe
+    if(!req.file){
+        return res.status(404).send({
             status: "error",
-            mensaje: "No se ha subido ninguna imagen"
+            message: "Peticion no incluye la imagen"
         });
-    }
+    } 
 
     // Conseguir el nombre del archivo
-    let archivo = req.file.originalname;
+    let image = req.file.originalname;
 
-    // Conseguir la extensión del archivo
-    let archivo_split = archivo.split('\.'); // split es un metodo que te permite cortar un STRING en varias partes
-    let extension = archivo_split[1]; // segundo elemento del arreglo (la extension)
+    // Sacar la extension del archivo
+    const imageSplit = image.split("\.");
+    const extension = imageSplit[1];
 
-    // Comprobar extensión correcta
-    if (extension != "png" && extension != "jpg" &&
-        extension != "jpeg" && extension != "gif") {
-
-        // borrar archivo sino es imagen
-        fs.unlink(req.file.path, (error) => {
-
-            if (error) {
-                // Si hay un error al intentar eliminar el archivo, se devuelve un error.
-                return res.status(500).json({
-                    status: "error",
-                    mensaje: "Error al eliminar la imagen"
-                });
-            }
-
-            return res.status(400).json({
-                status: "error",
-                mensaje: "Imagen invalida, eliminada con exito"
-            });
-        });
-
-    } else {
+    // Comprobar extension
+    if(extension != "png" && extension != "jpg" && extension != "jpeg" && extension != "gif"){
+        const filePath = req.file.path;
         
-        // Si todo va bien, actualizar el articulo
-        try {
-            // Recoger un id por la url
-            const id = req.params.id;
+        // Si no es correcto, borrar archivo
+        const fileDelete = fs.unlinkSync(filePath);
 
-            // Verificar que el id sea válido
-            if (!id || id.length !== 24) {
-                return res.status(400).json({
-                    status: "error",
-                    mensaje: "ID no válido"
-                });
-            }
-
-            // Buscar y atualizar la propiedad de imagen del articulo
-            const articuloActualizado = await Articulo.findOneAndUpdate(
-                { _id: id },
-                {imagen: req.file.filename},
-                { new: true }
-            );
-
-            // Verificar si el artículo fue actualizado
-            if (!articuloActualizado) {
-                return res.status(404).json({
-                    status: "error",
-                    mensaje: "Error al actualizar el artículo"
-                });
-            }
-
-            // Devolver resultado
-            return res.status(200).json({
-                status: "success",
-                mensaje: "Articulo actualizado exitosamente",
-                articulo: articuloActualizado,
-                fichero: req.file
-            });
-
-
-        } catch (error) {
-            // Manejar errores generales, incluyendo errores de base de datos
-            return res.status(500).json({
-                status: "error",
-                mensaje: "Error al buscar el articulo"
-            });
-        }
+        return res.status(400).send({
+            status: "error",
+            message: "La extension de la imagen no es valida"
+        });
     }
+    
 
+    // Si sí es correcta, guardar imagen en BD
+    try {
+        let articuloUpdated = await Articulo.findOneAndUpdate({"user": req.user.id, "_id": articuloId}, {imagen: req.file.filename}, {new: true});
 
+        // Devolver respuesta
+        return res.status(200).send({
+            status: "success",
+            articulo: articuloUpdated,
+            imagen: req.file,
+        });
+    }
+    catch(error){
+        return res.status(500).send({
+            status: "error",
+            message: "Error en la subida del avatar del usuario!"
+        });
+    }
 }
 
 // poder ver imagen de cada articulo
