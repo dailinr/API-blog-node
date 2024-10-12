@@ -21,11 +21,14 @@ app.use(express.urlencoded({extended:true})); // puedo recibir datos en formato 
 
 // RUTAS - para visualizar el resultado en el navegador
 const rutas_articulo = require("./rutas/articulo");
-const rutas_user = require("./rutas/usuario")
+const rutas_user = require("./rutas/usuario");
+const rutas_follow = require("./rutas/follow");
 
 // cargar las rutas
 app.use("/api", rutas_articulo); // parametros: todas las rutas se cargaran en /api, /api/ruta-articulo
 app.use("/api/usuario", rutas_user);
+app.use("/api/follow", rutas_follow);
+
 
 // Rutas prueba hardcodeadas
 
