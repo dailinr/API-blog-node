@@ -7,6 +7,6 @@ const Follow = require("../modelos/Follow");
 
 router.get("/prueba", FollowController.pruebaFollow);
 router.post("/save",  check.auth, FollowController.save);
-
+router.delete("/unfollow/:id",  check.auth, FollowController.unfollow);
 
 module.exports = router;
