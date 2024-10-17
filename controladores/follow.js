@@ -2,6 +2,9 @@ const Follow = require("../modelos/Follow");
 const User = require("../modelos/Usuario");
 const mongoosePaginate = require("mongoose-paginate-v2");
 
+// Importar servicio
+const followService = require("../serivicios/followService");
+
 // Acciones de prueba
 const pruebaFollow = (req, res) => {
     return res.status(200).send({
@@ -126,20 +129,23 @@ const following = async (req, res) => {
             });
         }
 
+        // array de usuarios en común de un usuario
+        let followUserIds = followService.followUserIds(req.user.id);
+
         // Devolver resultados
         return res.status(200).json({
             status: "success",
             contador: siguiendo.totalDocs,
             message: "Listado de usuarios que estoy siguiendo",
             siguiendo: siguiendo.docs,
+            user_following: (await followUserIds).following, // siguiendo (user identificado)
+            user_follow_me: (await followUserIds).followers, // me siguen (user identificado)
+
             page_actual: siguiendo.page,
             itemsForPage: siguiendo.limit,
             pages_total: siguiendo.totalPages,
         });
-
         
-
-        // array de usuarios en común de un usuario
     }
     catch(error){
         console.error("Error en la consulta a following:", error.message); // Para imprimir el error en la consola del servidor
