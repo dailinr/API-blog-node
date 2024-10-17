@@ -122,7 +122,7 @@ const following = async (req, res) => {
 
             return res.status(404).json({
                 status: "error",
-                mensaje: "No se han encontrado seguidores"
+                mensaje: "No se han encontrado seguidos"
             });
         }
 
@@ -153,11 +153,59 @@ const following = async (req, res) => {
 
 // Listado de usuarios de usuarios que siguen a cualquier otro usuario (mis seguidores)
 const followers = async (req, res) => {
+
+    let userId = req.user.id;
+
+    if(req.params.id) userId = req.params.id;
+
+    let page = 1;
+    if(req.params.page) page = parseInt(req.params.page);
+
+    const itemsPerPage = 10;
+
+    try{
+        // Ejecutar la consulta usando el campo "followed" para encontrar los seguidores
+        const seguidores = await Follow.paginate({"followed": userId},
+            {
+                populate: 
+                    { path: "user",
+                    select: "-__v -role -password"},
+                page,
+                limit: itemsPerPage,
+                sort: {fecha: -1}
+            }
+        )
+
+        if(!seguidores || !seguidores.docs.length === 0){
+
+            return res.status(400).send({
+                status: "error",
+                mensaje: "No se han encontrado seguidores"
+            });
+        }
+
+        // Devolver una respuesta
+        return res.status(200).send({
+            status: "success",
+            contador: seguidores.totalDocs,
+            message: "Listado de usuarios que siguen a este usuario",
+            seguidores: seguidores.docs,
+            page_actual: seguidores.page,
+            itemsForPage: seguidores.limit,
+            pages_total: seguidores.totalPages,
+        });
+
+    }
+    catch(error){
+        
+        return res.status(500).send({
+            status: "error",
+            message: "Error al hacer la consulta de followers",
+            error: error.message
+        });
+    }
     
-    return res.status(200).send({
-        status: "success",
-        message: "Listado de usuarios que me siguen"
-    });
+    
 }
 
 // Exportar acciones 
