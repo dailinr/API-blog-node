@@ -9,6 +9,7 @@ const User = require("../modelos/Usuario");
 
 // Importar servicios
 const jwt = require("../serivicios/jwt");
+const followService = require("../serivicios/followService");
 
 // Acciones de prueba
 const pruebaUsuario = (req, res) => {
@@ -173,10 +174,16 @@ const perfil = async (req, res) => {
             });
         }
 
+        // Info de seguimiento
+        const followInfo = await followService.followThisUser(req.user.id, id); // id user identificado - id usario vista perfil
+
         // Devolver el resultado
         return res.status(200).send({
             status: "success",
-            user: userPerfil
+            user: userPerfil,
+            
+            following: followInfo.following,
+            follower: followInfo.follower
         });
 
     }

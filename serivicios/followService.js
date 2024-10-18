@@ -11,7 +11,7 @@ const followUserIds = async(identityUserId) => {
 
         let following = await query.exec();
 
-        // ---------------- ------
+        // ----------------------
         let query_ = Follow.find({
             "followed": identityUserId
         })
@@ -42,10 +42,27 @@ const followUserIds = async(identityUserId) => {
     }
 }
 
+// Comprobar si sigo a un usuario y si ese usuario me sigue
 const followThisUser = async(identityUserId, profileUserId) => {
+    
+    let following = await Follow.findOne({
+        "user": identityUserId,
+        "followed": profileUserId // verifica si lo sigo
+    });
 
+    // ----------------------
+    let follower = await Follow.findOne({
+        "user": profileUserId, // verifica si me sigue
+        "followed": identityUserId
+    });
+
+    return {
+        following,
+        follower
+    }
 }
 
 module.exports = {
-    followUserIds
+    followUserIds,
+    followThisUser
 }
