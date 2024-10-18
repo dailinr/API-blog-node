@@ -130,7 +130,7 @@ const following = async (req, res) => {
         }
 
         // array de usuarios en común de un usuario
-        let followUserIds = followService.followUserIds(req.user.id);
+        let followUserIds = await followService.followUserIds(req.user.id);
 
         // Devolver resultados
         return res.status(200).json({
@@ -138,8 +138,8 @@ const following = async (req, res) => {
             contador: siguiendo.totalDocs,
             message: "Listado de usuarios que estoy siguiendo",
             siguiendo: siguiendo.docs,
-            user_following: (await followUserIds).following, // siguiendo (user identificado)
-            user_follow_me: (await followUserIds).followers, // me siguen (user identificado)
+            user_following: followUserIds.following, // siguiendo (user identificado)
+            user_follow_me: followUserIds.followers, // me siguen (user identificado)
 
             page_actual: siguiendo.page,
             itemsForPage: siguiendo.limit,
@@ -190,12 +190,20 @@ const followers = async (req, res) => {
             });
         }
 
+        // array de usuarios en común de un usuario
+        let followUserIds = await followService.followUserIds(req.user.id);
+
+
         // Devolver una respuesta
         return res.status(200).send({
             status: "success",
             contador: seguidores.totalDocs,
             message: "Listado de usuarios que siguen a este usuario",
             seguidores: seguidores.docs,
+
+            user_following: followUserIds.following, // siguiendo (user identificado)
+            user_follow_me: followUserIds.followers, // me siguen (user identificado)
+
             page_actual: seguidores.page,
             itemsForPage: seguidores.limit,
             pages_total: seguidores.totalPages,

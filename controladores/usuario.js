@@ -225,11 +225,17 @@ const list = async (req, res) => {
             });
         }
     
+        // array de usuarios en común de un usuario
+        let followUserIds = await followService.followUserIds(req.user.id);
+        
         // Devolver el resultado
         return res.status(200).send({
             status: "success", 
             mensaje: "listado de usuarios",
             users: users.docs,
+            user_following: followUserIds.following, // siguiendo (user identificado)
+            user_follow_me: followUserIds.followers, // me siguen (user identificado)
+
             page: users.page,
             itemsForPage: users.limit,
             total: users.totalDocs,
