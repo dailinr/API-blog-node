@@ -6,6 +6,9 @@ const { validarArticulo } = require("./../helpers/validarArticulo");
 const fs = require("fs"); // libreria para borrar archivo
 const path = require("path"); // me permite coger un archivo y poder enviarlo
 
+// importar servicios
+const followService = require("../serivicios/followService")
+
 // trabajaremos con programacion funcional (callback)
 const prueba = (req, res) => {
 
@@ -420,6 +423,64 @@ const articulosUser = async (req, res) => {
     
 }
 
+const feed = async(req, res) => {
+
+    // Sacar la pagina actual
+    let page = 1;
+    if(req.params.page) page = req.params.page;
+
+    // Establecer numero de elementos por pagina
+    const itemsPerPage = 8;
+
+    try{
+        // Sacar un array de ids de usuarios que yo sigo como usuario identificado
+        const myFollows = await followService.followUserIds(req.user.id);
+
+        //  devuelva los articulos. ordenar, popular, paginar
+        let articulos = await Articulo.paginate(
+            // articulos de cualquier user que esté en mis seguidos
+            {   "user": {"$in": myFollows.following}},
+            {
+                populate: {
+                    path: "user",
+                    select: "-password -__v  -role"
+                },
+                select: "-__v",
+                page: page,
+                limit: itemsPerPage,
+                sort: { fecha: -1 } 
+            }
+        );
+
+        if(!articulos || articulos.docs.length === 0){
+
+            return res.status(400).send({
+                status: "error",
+                mensaje: "No se obtuvo ningún articulo de la consulta"
+            })
+        }
+
+        // Extraer solo los artículos y devolverlos sin el campo "docs"
+        const { docs: articulosData, ...paginationInfo } = articulos;
+
+        return res.status(200).send({
+            status: "success",
+            message: "Feed de publicaciones",
+            myFollows: myFollows.following,
+            articulos: articulosData,  // Enviar los artículos directamente
+            pagination: paginationInfo  // Devolver información de paginación (opcional)
+        });
+    }
+    catch(error){
+        return res.status(500).send({
+            status: "error",
+            mensaje: "Error en consulta de follows"
+        })
+    }
+    
+}
+
+
 module.exports = {
     prueba,
     crear,
@@ -430,5 +491,6 @@ module.exports = {
     subirImagen,
     verImagen,
     buscar,
-    articulosUser
+    articulosUser,
+    feed
 }

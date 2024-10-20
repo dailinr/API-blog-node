@@ -35,5 +35,6 @@ router.post("/subir-imagen/:id", [check.auth, subidas.single("file0")], Articulo
 router.get("/ver-imagen/:fichero", check.auth, ArticuloControlador.verImagen); // parametro: el url del fichero de la imagen
 router.get("/buscar/:busqueda", ArticuloControlador.buscar);
 router.get("/articulos-usuario/:id/:page?", check.auth, ArticuloControlador.articulosUser );
+router.get("/feed/:page?", check.auth, ArticuloControlador.feed);
 
 module.exports = router; // exportamos el objeto router con las rutas de prueba 

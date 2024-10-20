@@ -112,9 +112,10 @@ const following = async (req, res) => {
         // Ejecutar la consulta usando plugin paginate 
         const siguiendo = await Follow.paginate({"user": userId}, 
             {
-                populate: // Populate para obtener los datos de cada usuario
-                    { path: "user followed", 
-                    select: "-password -__v  -role" }, // Filtrar campos 
+                populate: { // Populate para obtener los datos de cada usuario
+                    path: "user followed", 
+                    select: "-password -__v  -role" // Filtrar campos 
+                },
                 page, // Página actual
                 limit: itemsPerPage, // Items por página
                 sort: { fecha: -1 } // Orden descendente por fecha
