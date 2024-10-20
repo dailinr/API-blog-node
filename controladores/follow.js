@@ -114,7 +114,7 @@ const following = async (req, res) => {
             {
                 populate: { // Populate para obtener los datos de cada usuario
                     path: "user followed", 
-                    select: "-password -__v  -role" // Filtrar campos 
+                    select: "-password -__v  -role -email" // Filtrar campos 
                 },
                 page, // Página actual
                 limit: itemsPerPage, // Items por página
@@ -174,9 +174,10 @@ const followers = async (req, res) => {
         // Ejecutar la consulta usando el campo "followed" para encontrar los seguidores
         const seguidores = await Follow.paginate({"followed": userId},
             {
-                populate: 
-                    { path: "user",
-                    select: "-__v -role -password"},
+                populate: {
+                    path: "user",
+                    select: "-__v -role -password -email"
+                },
                 page,
                 limit: itemsPerPage,
                 sort: {fecha: -1}

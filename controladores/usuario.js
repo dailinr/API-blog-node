@@ -6,6 +6,8 @@ const path = require("path");
 
 // Importar modelo DB
 const User = require("../modelos/Usuario");
+const Follow = require("../modelos/Follow");
+const Articulo = require("../modelos/Articulo");
 
 // Importar servicios
 const jwt = require("../serivicios/jwt");
@@ -212,6 +214,7 @@ const list = async (req, res) => {
     try{
         // Obtener los usuarios de la DB
         let users = await User.paginate({}, {
+            select: "-__v -password -email -role",
             page: page,
             limit: itemsForPage,
             sort: { _id: -1 } // Orden descendente por _id
@@ -295,6 +298,9 @@ const update = async (req, res) => {
         if(userToUpdate.password){
             let pwd = await bcrypt.hash(userToUpdate.password, 10); // la contraseña a cifrar, numero de incriptaciones, 
             userToUpdate.password = pwd; // actualizo la contraseña a la ya cifrada (hash)
+        }
+        else{
+            delete userToUpdate.password;
         }
 
         // Buscar y actualizar (id del user a actualizar, objeto a actualizar, parametro para q actualize en la consulta)
@@ -404,6 +410,34 @@ const avatar = async (req, res) => {
 
 }
 
+const counters = async (req, res) => {
+
+    let userId = req.user.id;
+
+    if(req.params.id) userId = req.params.id;
+
+    try{
+        const following = await Follow.countDocuments({"user": userId});
+        const followed = await Follow.countDocuments({"followed": userId});
+        const articulos = await Articulo.countDocuments({"user": userId});
+
+        return res.status(200).send({
+            userId,
+            following: following,
+            followed: followed,
+            articulos: articulos
+        });
+    }
+    catch(error){
+
+        return res.status(500).send({
+            status: "error",
+            mensaje: "Error en los contadores",
+            error
+        });
+    }
+}
+
 // Exportar acciones
 module.exports = {
     pruebaUsuario, 
@@ -413,5 +447,6 @@ module.exports = {
     list,
     update,
     upload,
-    avatar
+    avatar,
+    counters
 }

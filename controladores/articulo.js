@@ -391,7 +391,7 @@ const articulosUser = async (req, res) => {
             { "user": userId },  // Filtro para buscar artículos del usuario
             {
                 sort: { fecha: -1 }, // Ordenar por fecha descendente
-                populate: { path: "user", select: '-password -__v -role' }, 
+                populate: { path: "user", select: '-password -__v -role -email' }, 
                 page: page,           // Número de página
                 limit: itemsPerPage    
             }
@@ -443,7 +443,7 @@ const feed = async(req, res) => {
             {
                 populate: {
                     path: "user",
-                    select: "-password -__v  -role"
+                    select: "-password -__v  -role -email"
                 },
                 select: "-__v",
                 page: page,
