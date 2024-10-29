@@ -63,27 +63,27 @@ const crear = async (req, res) => {
 // Metodo para conseguir los articulos de la db a listar
 const listar = async (req, res) => {
     
+    let page = 1;
+
+    // Verificar si hay un parámetro 
+    if (req.params.page) page = parseInt(req.params.page);
+
+    const itemsPerPage = 10;
+    
     try {
-        // Crear la consulta base
-        let query = Articulo.find({});
-
-        // Verificar si hay un parámetro "recientes"
-        if (req.params.recientes) {
-            // Aplicar limit para obtener solo los primeros 3 datos
-            query.limit(3);
-        }
-
-        // Aplicar sort para ordenar por fecha en orden descendente (mayor a menor) 
-        query.sort({ fecha: -1 });
-
+        
         // Ejecutar la consulta
-        const articulos = await query.exec(); // Ejecutar la consulta de manera asíncrona
+        let articulos = await Articulo.paginate({},
+            {
+                sort: { fecha: -1 },
+                page: page,
+                limit: itemsPerPage
+            }
+        );
 
-        // console.log("longitud: " + articulos.length);
+        if (!articulos || articulos.totalDocs <= 0) { // Si no hay artículos encontrados
 
-        if (!articulos || articulos.length === 0) { // Si no hay artículos encontrados
-
-            return res.status(404).json({
+            return res.status(404).send({
                 status: "error",
                 mensaje: "No se han encontrado artículos"
             });
@@ -92,8 +92,7 @@ const listar = async (req, res) => {
         // Si no hay errores devuelve un status de éxito y los datos de los artículos
         return res.status(200).json({
             status: "success",
-            contador: articulos.length,
-            parametro: req.params.recientes, // request a la url con parametro "recientes"
+            mensaje: "Listado de articulos",
             articulos
         });
 
@@ -391,7 +390,9 @@ const articulosUser = async (req, res) => {
             { "user": userId },  // Filtro para buscar artículos del usuario
             {
                 sort: { fecha: -1 }, // Ordenar por fecha descendente
-                populate: { path: "user", select: '-password -__v -role -email' }, 
+                populate: {
+                    path: "user", select: '-password -__v -role -email' 
+                }, 
                 page: page,           // Número de página
                 limit: itemsPerPage    
             }
