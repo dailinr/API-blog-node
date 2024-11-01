@@ -62,46 +62,55 @@ const crear = async (req, res) => {
 
 // Metodo para conseguir los articulos de la db a listar
 const listar = async (req, res) => {
-    
-    let page = 1;
+
+    let page = 1; // Sacar la pagina actual
 
     // Verificar si hay un parámetro 
-    if (req.params.page) page = parseInt(req.params.page);
+    if(req.params.page) page = req.params.page;
 
-    const itemsPerPage = 10;
-    
-    try {
+    // Establecer numero de elementos por pagina
+    const itemsPerPage = 8;
+
+    try{
         
-        // Ejecutar la consulta
-        let articulos = await Articulo.paginate({},
+        let articulos = await Articulo.paginate(
+            { },
             {
-                sort: { fecha: -1 },
+                populate: {
+                    path: "user",
+                    select: "-password -__v  -role -email"
+                },
+                select: "-__v",
                 page: page,
-                limit: itemsPerPage
+                limit: itemsPerPage,
+                sort: { fecha: -1 } 
             }
         );
 
-        if (!articulos || articulos.totalDocs <= 0) { // Si no hay artículos encontrados
+        if(!articulos || articulos.docs.length === 0){
 
-            return res.status(404).send({
+            return res.status(400).send({
                 status: "error",
-                mensaje: "No se han encontrado artículos"
-            });
+                mensaje: "No se obtuvo ningún articulo de la consulta"
+            })
         }
 
-        // Si no hay errores devuelve un status de éxito y los datos de los artículos
-        return res.status(200).json({
-            status: "success",
-            mensaje: "Listado de articulos",
-            articulos
-        });
+        // Extraer solo los artículos y devolverlos sin el campo "docs"
+        const { docs: articulosData, ...paginationInfo } = articulos;
 
-    } catch (error) {
+        return res.status(200).send({
+            status: "success",
+            message: "Listado de todos los articulos",
+            articulos: articulosData,  // Enviar los artículos directamente
+            pagination: paginationInfo  // Devolver información de paginación (opcional)
+        });
+    }
+    catch(error){
         // Capturar cualquier error que ocurra durante la consulta
-        return res.status(500).json({
+        return res.status(500).send({
             status: "error",
             mensaje: "Error al obtener los artículos"
-        });
+        })
     }
 };
 
@@ -481,6 +490,64 @@ const feed = async(req, res) => {
     
 }
 
+const incrementarVistas = async (req, res) => {
+
+    try {
+        // obtener el id del articulo
+        const idArticulo = req.params.id;
+        
+        const articulo = await Articulo.findByIdAndUpdate(
+            idArticulo,
+            { $inc: { views: 1 } }, // Incrementa en 1 la cantidad de vistas
+            { new: true }           // Retorna el documento actualizado
+        );
+
+        if (!articulo) {
+            return res.status(404).json({
+                status: "error",
+                mensaje: "No se encontró el artículo"
+            });
+        }
+
+        return res.status(200).json({
+            status: "success",
+            mensaje: "Artículo visto e incrementado",
+            articulo
+        });
+    } 
+    catch (error) {
+
+        return res.status(500).json({
+            status: "error",
+            mensaje: "Error al incrementar las vistas del artículo"
+        });
+    }
+};
+
+const obtenerMasVistos = async (req, res) => {
+
+    try {
+        
+        const articulosMasVistos = await Articulo.find()
+            .sort({ views: -1 }) // Ordena por vistas de mayor a menor
+            .limit(3);           // Limita a los 3 más vistos
+
+        return res.status(200).json({
+            status: "success",
+            mensaje: "Artículos más vistos",
+            articulos: articulosMasVistos
+        });
+    } 
+    catch (error) {
+
+        return res.status(500).json({
+            status: "error",
+            mensaje: "Error al obtener los artículos más vistos"
+        });
+    }
+};
+
+
 
 module.exports = {
     prueba,
@@ -493,5 +560,7 @@ module.exports = {
     verImagen,
     buscar,
     articulosUser,
-    feed
+    feed,
+    incrementarVistas,
+    obtenerMasVistos
 }

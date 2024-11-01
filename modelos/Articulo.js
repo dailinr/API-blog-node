@@ -31,6 +31,10 @@ const ArticulosSchema = Schema({ // parametro: esquema de la db (todos los docs 
         type: String,
         default: "default.png",
     },
+    views: { 
+        type: Number, 
+        default: 0 
+    }
 });  
 
 ArticulosSchema.plugin(mongoosePaginate);

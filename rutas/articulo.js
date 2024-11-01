@@ -27,7 +27,7 @@ router.get("/ruta-de-prueba", ArticuloControlador.prueba); // parametros: nombre
 
 // Rutas utiles de nuestra api
 router.post("/crear", check.auth, ArticuloControlador.crear); // metodo post porque se está enviando informacion
-router.get("/listar/:page?", ArticuloControlador.listar); // listar todos los articulos y listar (:) parametro recientes es (?) opcional
+router.get("/listar/:page?", check.auth, ArticuloControlador.listar); // listar todos los articulos y listar (:) parametro recientes es (?) opcional
 router.get("/articulo/:id", check.auth, ArticuloControlador.obtener); // obtener un articulo especifico, parametro obligatorio
 router.delete("/articulo/:id", check.auth, ArticuloControlador.borrar); // borrar un articulo segun id
 router.put("/articulo/:id", ArticuloControlador.editar); // actulizar las propiedades del articulo
@@ -36,5 +36,7 @@ router.get("/ver-imagen/:fichero",  ArticuloControlador.verImagen); // parametro
 router.get("/buscar/:busqueda", ArticuloControlador.buscar);
 router.get("/articulos-usuario/:id/:page?", check.auth, ArticuloControlador.articulosUser );
 router.get("/feed/:page?", check.auth, ArticuloControlador.feed);
+router.get("/ver/:id", check.auth, ArticuloControlador.incrementarVistas);
+router.get("/mas-vistos", check.auth, ArticuloControlador.obtenerMasVistos); 
 
 module.exports = router; // exportamos el objeto router con las rutas de prueba 
