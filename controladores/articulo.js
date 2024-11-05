@@ -530,7 +530,7 @@ const obtenerMasVistos = async (req, res) => {
         
         const articulosMasVistos = await Articulo.find()
             .sort({ views: -1 }) // Ordena por vistas de mayor a menor
-            .limit(3);           // Limita a los 3 más vistos
+            .limit(10);           // Limita a los 10 más vistos
 
         return res.status(200).json({
             status: "success",

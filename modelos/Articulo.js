@@ -21,10 +21,11 @@ const ArticulosSchema = Schema({ // parametro: esquema de la db (todos los docs 
     },
     fecha: {
         type: Date,
-        default: () => {
-            const now = new Date();
-            return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        },
+        default: Date.now()
+        // default: () => {
+        //     const now = new Date();
+        //     return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        // },
         // no le especificamos si es requerida porque por defecto tendrá ya una
     },
     imagen: {
