@@ -62,7 +62,19 @@ const followThisUser = async(identityUserId, profileUserId) => {
     }
 }
 
+const saveFollow = async(userId, followedId) => {    
+
+    try {
+        const follow = new Follow({ user: userId, followed: followedId });
+        return await follow.save();
+    } 
+    catch (error) {
+        throw new Error("Error al guardar el seguimiento: " + error.message);
+    }
+}
+
 module.exports = {
     followUserIds,
-    followThisUser
+    followThisUser,
+    saveFollow
 }

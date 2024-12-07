@@ -30,12 +30,13 @@ const save = async (req, res) => {
 
     // Guardar objeto en base de datos
     try{
-        let followStored = await userToFollow.save();
+        // guardamos el follow usando el servicio
+        const followStored = await followService.saveFollow(userToFollow.user, userToFollow.followed);
 
         if(!followStored){
             return res.status(500).send({
                 status: "error",
-                mensaje: "no se ha podido dar follow"
+                mensaje: "No se pudo guardar el follow"
             })
         }
 

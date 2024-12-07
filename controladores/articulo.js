@@ -528,14 +528,25 @@ const obtenerMasVistos = async (req, res) => {
 
     try {
         
-        const articulosMasVistos = await Articulo.find()
-            .sort({ views: -1 }) // Ordena por vistas de mayor a menor
-            .limit(10);           // Limita a los 10 más vistos
+        const articulosMasVistos = await Articulo.paginate({},
+            {
+                populate: {
+                    path: "user",
+                    select: "-password -__v  -role -email"
+                },
+                limit: 10,
+                sort: { views: -1 } 
+            }
+        );
+        
+        // Extraer solo los artículos y devolverlos sin el campo "docs"
+        const { docs: articulosMasVistosData, ...paginationInfo } = articulosMasVistos;
 
         return res.status(200).json({
             status: "success",
             mensaje: "Artículos más vistos",
-            articulos: articulosMasVistos
+            articulos: articulosMasVistosData,
+            pagination: paginationInfo
         });
     } 
     catch (error) {
