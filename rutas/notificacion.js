@@ -7,6 +7,6 @@ const Notificacion = require("../modelos/Notificacion");
 
 router.get("/prueba", NotiController.pruebaNoti);
 router.post("/follows", check.auth, NotiController.saveFollows);
-router.get("/mostrar/:id", check.auth, NotiController.mostrarNotis);
+router.get("/mostrar/:id/:page?", check.auth, NotiController.mostrarNotis);
 
 module.exports = router;

@@ -12,6 +12,7 @@ const Articulo = require("../modelos/Articulo");
 // Importar servicios
 const jwt = require("../serivicios/jwt");
 const followService = require("../serivicios/followService");
+const validate = require("../helpers/validate");
 
 // Acciones de prueba
 const pruebaUsuario = (req, res) => {
@@ -35,6 +36,14 @@ const registrar = async (req, res) => {
             status: "error",
             message: "validacion de registro INCORRECTA "
         });
+    }
+
+    // Validacion avanzada
+    try{
+        validate(params);
+    }
+    catch(error){
+        return res.status(400).json({ status: "error", message: "Validacion de datos no superada", });
     }
 
     try {
@@ -209,7 +218,7 @@ const list = async (req, res) => {
     }
 
     // Número de elementos por página -
-    let itemsForPage = 5;
+    let itemsForPage = 6;
     
     try{
         // Obtener los usuarios de la DB

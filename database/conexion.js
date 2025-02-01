@@ -7,11 +7,7 @@ const conexion = async() => {
     try{
         // conexion a la base de datos
         await mongoose.connect("mongodb://localhost:27017/mi_blog");
-        // parametros
-        // useNewUrlParser: true
-        // useUnifiedTopology: true
-        // useCreateIndex: true
-        
+       
         console.log("Conectado correctamente a la base de datos mi_blog"); // mensaje de conexion
 
     } catch(error){

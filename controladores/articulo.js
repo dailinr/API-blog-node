@@ -2,7 +2,7 @@
 // Aqui van todos los metodos y funcionalidades de nuestra api
 
 const Articulo = require("../modelos/Articulo"); // importamos el doc articulo de nuestro modelo db
-const { validarArticulo } = require("./../helpers/validarArticulo");
+const { validarArticulo } = require("../helpers/validarArticulo");
 const fs = require("fs"); // libreria para borrar archivo
 const path = require("path"); // me permite coger un archivo y poder enviarlo
 

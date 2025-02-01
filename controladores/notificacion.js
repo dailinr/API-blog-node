@@ -42,13 +42,16 @@ const saveFollows = async(req, res) => {
 const mostrarNotis = async(req, res) => {
 
     let page = 1;
+
+    if(req.params.page) page = req.params.page;
+
     let itemsForPage = 5;
 
     // recibir id del usuario por body
     const idUser = req.params.id;
 
     try{
-        // Obtener las notis e la DB
+        // Obtener las notis de la DB
         let notis = await Notificacion.paginate({user : idUser}, {
             populate: {
                 path: "seguidor",
