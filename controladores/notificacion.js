@@ -17,7 +17,7 @@ const pruebaNoti = (req, res) => {
 // Notificacion de nuevos seguimientos
 const saveFollows = async(req, res) => {
 
-    const { idUser: idUser, idSeguidor: idSeguidor } = req.body
+    const { idUser: idUser, idSeguidor: idSeguidor } = req.body;
 
     try {
         // Guardar la notificación

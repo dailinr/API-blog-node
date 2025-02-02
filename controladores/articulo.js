@@ -2,6 +2,7 @@
 // Aqui van todos los metodos y funcionalidades de nuestra api
 
 const Articulo = require("../modelos/Articulo"); // importamos el doc articulo de nuestro modelo db
+const Usuario = require("../modelos/Usuario");
 const { validarArticulo } = require("../helpers/validarArticulo");
 const fs = require("fs"); // libreria para borrar archivo
 const path = require("path"); // me permite coger un archivo y poder enviarlo
@@ -558,7 +559,98 @@ const obtenerMasVistos = async (req, res) => {
     }
 };
 
+const guardarFavs = async(req, res) => {
 
+    // idArticulo a marcar favorito y el usuario logeado
+    const idArticulo = req.params.id;
+    const idUsuario = req.user.id; 
+
+    try{
+        // Buscar el artículo
+        const articulo = await Articulo.findById(idArticulo);
+        if (!articulo) {
+            return res.status(404).json({
+                status: "error",
+                mensaje: "No se encontró el artículo"
+            });
+        }
+
+        // Buscar al usuario y actualizar su lista de favoritos
+        const usuario = await Usuario.findById(idUsuario);
+        if (!usuario) {
+            return res.status(404).json({
+                status: "error",
+                mensaje: "Usuario no encontrado"
+            });
+        }
+
+        // Verificar si el artículo ya está en favoritos
+        if (!usuario.favoritos.includes(idArticulo)) {
+            usuario.favoritos.push(idArticulo);
+            await usuario.save();
+        }
+
+        return res.status(200).json({
+            status: "success",
+            mensaje: "Artículo agregado a favoritos",
+            favoritos: usuario.favoritos
+        });
+    }
+    catch(error){
+
+        return res.status(500).json({
+            status: "error",
+            mensaje: "Error al guardar el favorito",
+            error: error.message
+        });
+    }
+}
+
+const eliminarFavs = async(req, res) => {
+    // idArticulo a eliminar de favoritos y el usuario logeado
+    const idArticulo = req.params.id;
+    const idUsuario = req.user.id;
+
+    try{
+        // Buscar el artículo
+        const articulo = await Articulo.findById(idArticulo);
+        if (!articulo) {
+            return res.status(404).json({
+                status: "error",
+                mensaje: "No se encontró el artículo"
+            });
+        }
+
+        // Buscar al usuario y actualizar su lista de favoritos
+        const usuario = await Usuario.findById(idUsuario);
+        if (!usuario) {
+            return res.status(404).json({
+                status: "error",
+                mensaje: "Usuario no encontrado"
+            });
+        }
+
+        // Eliminar el artículo de la lista de favoritos
+        usuario.favoritos = usuario.favoritos.filter(fav => fav.toString() !== idArticulo);
+
+        // Guardar los cambios en la base de datos
+        await usuario.save();
+
+        return res.status(200).json({
+            status: "success",
+            mensaje: "Artículo eliminado de favoritos",
+            favoritos: usuario.favoritos
+        });
+    }
+    catch(error){
+        return res.status(500).json({
+            status: "error",
+            mensaje: "Error al eliminar el favorito",
+            error: error.message
+        });
+
+    }
+}
 
 module.exports = {
     prueba,
@@ -573,5 +665,7 @@ module.exports = {
     articulosUser,
     feed,
     incrementarVistas,
-    obtenerMasVistos
+    obtenerMasVistos,
+    guardarFavs,
+    eliminarFavs
 }

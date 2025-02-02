@@ -38,5 +38,8 @@ router.get("/articulos-usuario/:id/:page?", check.auth, ArticuloControlador.arti
 router.get("/feed/:page?", check.auth, ArticuloControlador.feed);
 router.get("/ver/:id", check.auth, ArticuloControlador.incrementarVistas);
 router.get("/mas-vistos", check.auth, ArticuloControlador.obtenerMasVistos); 
+router.post("/add-favoritos/:id", check.auth, ArticuloControlador.guardarFavs); 
+router.delete("/eliminar-favs/:id", check.auth, ArticuloControlador.eliminarFavs);
+
 
 module.exports = router; // exportamos el objeto router con las rutas de prueba 

@@ -27,6 +27,7 @@ router.put("/update", check.auth, UserController.update);
 router.post("/upload", [check.auth, uploads.single("file0")], UserController.upload);
 router.get("/avatar/:file", UserController.avatar);
 router.get("/counters/:id", check.auth, UserController.counters);
+router.get("/favoritos", check.auth, UserController.listarFavs);
 
 // Exporto las rutas para poder ser utilizadas en otro archivo
 module.exports = router; 

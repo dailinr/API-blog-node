@@ -447,6 +447,39 @@ const counters = async (req, res) => {
     }
 }
 
+const listarFavs = async(req, res) => {
+    
+    // id del usuario logeado
+    const idUsuario = req.user.id;
+
+    try{
+        const usuario = await User.findById(idUsuario)
+            .populate("favoritos")
+            .select("favoritos");
+
+        if (!usuario) {
+            return res.status(404).json({
+                status: "error",
+                mensaje: "Usuario no encontrado"
+            });
+        }
+
+        return res.status(200).json({
+            status: "success",
+            favoritos: usuario.favoritos // Retorna el array de artículos populados
+        });
+
+    }
+    catch(error){
+
+        return res.status(500).json({
+            status: "error",
+            mensaje: "error al listar los favoritos del usuario",
+            error: error.message
+        });
+    }
+}
+
 // Exportar acciones
 module.exports = {
     pruebaUsuario, 
@@ -457,5 +490,6 @@ module.exports = {
     update,
     upload,
     avatar,
-    counters
+    counters,
+    listarFavs
 }

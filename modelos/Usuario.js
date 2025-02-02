@@ -35,7 +35,11 @@ const UserSchema = Schema({
     create_at: {
         type: Date,
         default: Date.now
-    }
+    },
+    favoritos: [{
+        type: Schema.ObjectId,
+        ref: "Articulo"
+    }],
 });
 
 // Aplicar el plugin de paginación al esquema
