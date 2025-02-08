@@ -6,7 +6,8 @@ console.log("App node arrancada");
 
 // Crear servidor Node
 const app = express();
-const puerto = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
+
 
 // Configuración de CORS
 const corsOptions = {
@@ -25,6 +26,7 @@ app.use(express.urlencoded({extended:true})); // puedo recibir datos en formato 
 
 // 🔹 Conexión optimizada a MongoDB para Vercel
 let isConnected; // Variable global para evitar múltiples conexiones
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/mi_blog";
 
 async function connectDB() {
   if (isConnected) {
@@ -32,7 +34,7 @@ async function connectDB() {
     return;
   }
   try {
-    await mongoose.connect('mongodb://dhayromero27:dayromero27@cluster0-shard-00-00.i5sfh.mongodb.net:27017,cluster0-shard-00-01.i5sfh.mongodb.net:27017,cluster0-shard-00-02.i5sfh.mongodb.net:27017/blog?ssl=true&replicaSet=atlas-qmxs04-shard-0&authSource=admin&retryWrites=true&w=majority&appName=Cluster0');
+    await mongoose.connect(MONGODB_URI);
     
     isConnected = mongoose.connection.readyState === 1;
     console.log("Conectado a la base de datos");
@@ -68,6 +70,6 @@ app.use((err, req, res, next) => {
 });
 
 // Crear servidor y escuchar peticiones http
-app.listen(puerto, () => { // se pasa un puerto como parametro y funcion verifique q el servidor corra
-    console.log("Servidor corriendo en el puerto: " + puerto);
+app.listen(PORT, () => { // se pasa un puerto como parametro y funcion verifique q el servidor corra
+    console.log("Servidor corriendo en el puerto: " + PORT);
 });
