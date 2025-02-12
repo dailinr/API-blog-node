@@ -42,4 +42,4 @@ router.post("/add-favoritos/:id", check.auth, ArticuloControlador.guardarFavs);
 router.delete("/eliminar-favs/:id", check.auth, ArticuloControlador.eliminarFavs);
 
 
-module.exports = router; // exportamos el objeto router con las rutas de prueba 
+module.exports = router; 
