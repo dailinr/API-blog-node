@@ -11,10 +11,13 @@ exports.auth = (req, res, next) => {
     
     // Comprobar si me llega la cabecera de auth
     if(!req.headers.authorization){
-        return res.status(403).send({
-            status: "error",
-            mensaje: "La peticion no tiene la cabecera de autenticación",
-        });
+        req.user = null; // No hay usuario autenticado
+        return next(); // Continúa sin autenticación
+
+        // return res.status(403).send({
+        //     status: "error",
+        //     mensaje: "La peticion no tiene la cabecera de autenticación",
+        // });
     }
 
     // Decodificar el token - limpiar el token de comilas o simbolos
@@ -36,11 +39,13 @@ exports.auth = (req, res, next) => {
         
     }
     catch(error){
-        return res.status(404).send({
-            status: "error",
-            mensaje: "Token invalido",
-            error
-        });
+        req.user = null; // Token inválido, pero no bloqueamos la petición
+
+        // return res.status(404).send({
+        //     status: "error",
+        //     mensaje: "Token invalido",
+        //     error
+        // });
     }
 
     // Pasar a la ejecucion de la accion (metodo de la ruta)

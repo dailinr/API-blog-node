@@ -184,8 +184,16 @@ const perfil = async (req, res) => {
         }
 
         // Info de seguimiento
-        const followInfo = await followService.followThisUser(req.user.id, id); // id user identificado - id usario vista perfil
+        let followInfo = { following: false, follower: false }; // Valor por defecto
 
+        // Si req.user existe, obtener información de seguimiento
+        if (req.user) {
+            console.log("Usuario autenticado:", req.user);
+            followInfo = await followService.followThisUser(req.user.id, id);
+        } else {
+            console.log("Usuario no autenticado, no se obtiene info de seguimiento.");
+        }
+        
         // Devolver el resultado
         return res.status(200).send({
             status: "success",
@@ -199,7 +207,8 @@ const perfil = async (req, res) => {
     catch(error){
         return res.status(400).send({
             status: "error",
-            mensaje: "Error en el servidor"
+            mensaje: "Error en el servidor",
+            error: error.message
         });
     }
 }
