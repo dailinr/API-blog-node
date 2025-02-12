@@ -3,7 +3,7 @@ const router = express.Router(); // tendremos un objeto que tendrá las funcione
 const multer = require("multer"); // libreria para poder subir ficheros e imagenes
 const check = require("../middlewares/auth");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("../config/cloudinary");
+const cloudinary = require("../cloudinary");
 
 // cargamos el controlador
 const ArticuloControlador = require("../controladores/articulo");

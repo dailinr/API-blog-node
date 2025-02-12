@@ -6,7 +6,7 @@ const Usuario = require("../modelos/Usuario");
 const { validarArticulo } = require("../helpers/validarArticulo");
 const fs = require("fs"); // libreria para borrar archivo
 const path = require("path"); // me permite coger un archivo y poder enviarlo
-const cloudinary = require("../config/cloudinary");
+const cloudinary = require("../cloudinary");
 
 // importar servicios
 const followService = require("../serivicios/followService")
