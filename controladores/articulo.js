@@ -6,6 +6,7 @@ const Usuario = require("../modelos/Usuario");
 const { validarArticulo } = require("../helpers/validarArticulo");
 const fs = require("fs"); // libreria para borrar archivo
 const path = require("path"); // me permite coger un archivo y poder enviarlo
+const cloudinary = require("../config/cloudinary");
 
 // importar servicios
 const followService = require("../serivicios/followService")
@@ -277,46 +278,35 @@ const subirImagen = async (req, res) => {
         });
     } 
 
-    // Conseguir el nombre del archivo
-    let image = req.file.originalname;
-
-    // Sacar la extension del archivo
-    const imageSplit = image.split("\.");
-    const extension = imageSplit[1];
-
-    // Comprobar extension
-    if(extension != "png" && extension != "jpg" && extension != "jpeg" && extension != "gif"){
-        const filePath = req.file.path;
-        
-        // Si no es correcto, borrar archivo
-        const fileDelete = fs.unlinkSync(filePath);
-
-        return res.status(400).send({
-            status: "error",
-            message: "La extension de la imagen no es valida"
-        });
-    }
-    
-
-    // Si sí es correcta, guardar imagen en BD
     try {
-        let articuloUpdated = await Articulo.findOneAndUpdate({"user": req.user.id, "_id": articuloId}, {imagen: req.file.filename}, {new: true});
+        // Subir imagen a Cloudinary
+        const resultado = await cloudinary.uploader.upload(req.file.path, {
+            folder: "articulos" // Carpeta dentro de Cloudinary
+        });
 
-        // Devolver respuesta
+        // Eliminar el archivo temporal
+        fs.unlinkSync(req.file.path);
+
+        // Guardar la URL de la imagen en la base de datos
+        const articuloUpdated = await Articulo.findOneAndUpdate(
+            { "user": req.user.id, "_id": articuloId },
+            { imagen: resultado.secure_url },
+            { new: true }
+        );
+
         return res.status(200).send({
             status: "success",
             articulo: articuloUpdated,
-            imagen: req.file,
+            imagen: resultado.secure_url
         });
-    }
-    catch(error){
+    } 
+    catch (error) {
         return res.status(500).send({
             status: "error",
-            message: "Error en la subida del avatar del usuario!"
+            message: "Error al subir la imagen"
         });
     }
-}
-
+};
 // poder ver imagen de cada articulo
 const verImagen = (req, res) => {
     let fichero =  req.params.fichero; 

@@ -2,20 +2,18 @@ const express = require("express"); // importamos el metodo express
 const router = express.Router(); // tendremos un objeto que tendrá las funciones del metodo Router
 const multer = require("multer"); // libreria para poder subir ficheros e imagenes
 const check = require("../middlewares/auth");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../config/cloudinary");
 
 // cargamos el controlador
 const ArticuloControlador = require("../controladores/articulo");
-const Articulo = require("../modelos/Articulo");
-
 
 // Se indica en que carpeta se almacenarán todos los archivos
-const storage = multer.diskStorage({
-
-    destination: (req, file, cb) => { // parametros: una request y el archivo que se va a subir, cb nos permite indicar el destino
-        cb(null, './imagenes/articulos/'); // en esta carpeta se guardarán
-    },
-    filename: (req, file, cb) => {
-        cb(null, "articulo-" + Date.now() + "-" + file.originalname);
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: "articulos",
+        allowedFormats: ["jpg", "png", "jpeg", "gif"]
     }
 });
 
