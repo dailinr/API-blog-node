@@ -321,13 +321,12 @@ const subirImagen = async (req, res) => {
     }
 };
 
-// ver la imagen de cada articulo
 const verImagen = async (req, res) => {
 
     try {
-        const articuloId = req.params.id;
+        const articuloId = req.params.articuloId;
 
-        // Buscar el artículo en la base de datos
+        // Buscar el artículo en la base de datos por su ID
         const articulo = await Articulo.findById(articuloId);
 
         if (!articulo) {
@@ -344,14 +343,13 @@ const verImagen = async (req, res) => {
             });
         }
 
-        // Devolver la URL de la imagen
+        // Devolver la URL de la imagen desde la base de datos
         return res.status(200).json({
             status: "success",
             imagen: articulo.imagen
         });
 
-    } 
-    catch (error) {
+    } catch (error) {
         return res.status(500).json({
             status: "error",
             mensaje: "Error al obtener la imagen",
@@ -359,7 +357,6 @@ const verImagen = async (req, res) => {
         });
     }
 };
-
 
 // Buscar en nuestros articulos de la base de datos
 const buscar = (req, res) => {
