@@ -270,6 +270,15 @@ const subirImagen = async (req, res) => {
     // sacar id del articulo
     const articuloId = req.params.id;
 
+    const articulo = await Articulo.findById(articuloId);
+    if (!articulo) {
+        return res.status(404).send({
+            status: "error",
+            message: "El artículo no existe"
+        });
+    }
+
+
     // Recoger el fichero de imagenes y comprobar que existe
     if(!req.file){
         return res.status(404).send({
@@ -303,10 +312,12 @@ const subirImagen = async (req, res) => {
     catch (error) {
         return res.status(500).send({
             status: "error",
-            message: "Error al subir la imagen"
+            message: "Error al subir la imagen",
+            error: error.message
         });
     }
 };
+
 // poder ver imagen de cada articulo
 const verImagen = (req, res) => {
     let fichero =  req.params.fichero; 

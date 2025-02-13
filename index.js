@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 
 // Configuración de CORS
 const corsOptions = {
-    origin: "https://tecnopulse.lat",  // ⚠️ Permite cualquier origen (puedes restringirlo a tu dominio)
+    origin: "*",  // ⚠️ Permite cualquier origen (puedes restringirlo a tu dominio)
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
