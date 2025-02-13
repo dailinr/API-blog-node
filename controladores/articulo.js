@@ -278,7 +278,6 @@ const subirImagen = async (req, res) => {
         });
     }
 
-
     // Recoger el fichero de imagenes y comprobar que existe
     if(!req.file){
         return res.status(404).send({
@@ -286,6 +285,8 @@ const subirImagen = async (req, res) => {
             message: "Peticion no incluye la imagen"
         });
     } 
+    // Guardar la ruta del archivo local antes de subir a Cloudinary
+    const filePath = req.file.path;  
 
     try {
         // Subir imagen a Cloudinary
@@ -293,8 +294,10 @@ const subirImagen = async (req, res) => {
             folder: "articulos" // Carpeta dentro de Cloudinary
         });
 
-        // Eliminar el archivo temporal
-        fs.unlinkSync(req.file.path);
+        // Verificar si el archivo temporal existe antes de eliminarlo
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
 
         // Guardar la URL de la imagen en la base de datos
         const articuloUpdated = await Articulo.findOneAndUpdate(
