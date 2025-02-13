@@ -321,39 +321,42 @@ const subirImagen = async (req, res) => {
     }
 };
 
-const verImagen = async (req, res) => {
+const axios = require("axios");
 
+const verImagen = async (req, res) => {
     try {
         const articuloId = req.params.articuloId;
 
-        // Buscar el artículo en la base de datos por su ID
+        // Buscar el artículo en la base de datos
         const articulo = await Articulo.findById(articuloId);
 
-        if (!articulo) {
-            return res.status(404).json({
-                status: "error",
-                mensaje: "Artículo no encontrado"
-            });
+        if (!articulo || !articulo.imagen) {
+            return res.status(404).json({ status: "error", mensaje: "Imagen no encontrada" });
         }
 
-        if (!articulo.imagen) {
-            return res.status(404).json({
-                status: "error",
-                mensaje: "El artículo no tiene imagen"
-            });
+        // Descargar la imagen desde Cloudinary
+        const response = await axios.get(articulo.imagen, { responseType: "arraybuffer" });
+
+        // Lista de formatos admitidos
+        const formatosPermitidos = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+        let contentType = response.headers["content-type"];
+
+        // Si no hay content-type o no es un formato de imagen, asignar un valor predeterminado
+        if (!contentType || !formatosPermitidos.includes(contentType)) {
+            contentType = "image/jpeg"; // Por defecto, JPEG
         }
 
-        // Devolver la URL de la imagen desde la base de datos
-        return res.status(200).json({
-            status: "success",
-            imagen: articulo.imagen
-        });
+        // Configurar encabezado y enviar imagen
+        res.setHeader("Content-Type", contentType);
+        return res.send(response.data);
 
     } catch (error) {
-        return res.status(500).json({
-            status: "error",
-            mensaje: "Error al obtener la imagen",
-            error: error.message
+        console.error("Error al obtener la imagen:", error.message);
+
+        return res.status(500).json({ 
+            status: "error", 
+            mensaje: "Error al obtener la imagen", 
+            error: error.message 
         });
     }
 };
