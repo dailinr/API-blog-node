@@ -321,30 +321,45 @@ const subirImagen = async (req, res) => {
     }
 };
 
-// poder ver imagen de cada articulo
-const verImagen = (req, res) => {
-    let fichero =  req.params.fichero; 
-    let rutaFisica = "./imagenes/articulos/" + fichero; 
+// ver la imagen de cada articulo
+const verImagen = async (req, res) => {
 
-    // Verificar que el id sea válido y tenga acceso a ese fichero
-    fs.stat(rutaFisica, (error, existe) => {
-        
-        if (existe) {
-            // devolvermos como respuesta un archivo como tal
-            return res.sendFile(path.resolve(rutaFisica));
-        }
-        else{
-            // si hay algun error 
+    try {
+        const articuloId = req.params.id;
+
+        // Buscar el artículo en la base de datos
+        const articulo = await Articulo.findById(articuloId);
+
+        if (!articulo) {
             return res.status(404).json({
                 status: "error",
-                mensaje: "La imagen no existe",
-                existe,
-                fichero, 
-                rutaFisica
+                mensaje: "Artículo no encontrado"
             });
         }
-    })
-}
+
+        if (!articulo.imagen) {
+            return res.status(404).json({
+                status: "error",
+                mensaje: "El artículo no tiene imagen"
+            });
+        }
+
+        // Devolver la URL de la imagen
+        return res.status(200).json({
+            status: "success",
+            imagen: articulo.imagen
+        });
+
+    } 
+    catch (error) {
+        return res.status(500).json({
+            status: "error",
+            mensaje: "Error al obtener la imagen",
+            error: error.message
+        });
+    }
+};
+
 
 // Buscar en nuestros articulos de la base de datos
 const buscar = (req, res) => {
