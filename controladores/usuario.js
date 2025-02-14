@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const mongoosePaginate = require("mongoose-paginate-v2");
 const fs = require("fs");
 const path = require("path");
+const cloudinary = require("../cloudinary");
 
 // Importar modelo DB
 const User = require("../modelos/Usuario");
@@ -350,80 +351,101 @@ const update = async (req, res) => {
 
 const upload = async (req, res) => {
 
-    // Recoger el fichero de imagenes y comprobar que existe
-    if(!req.file){
+    // sacar id del usuario
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+
+    if(!user) {
+        return res.status(404).send({
+            status: "error",
+            message: "El usuario no existe"
+        });
+    }
+    
+    // Recoger ek fichero de imagenes y comprobar que existe
+    if(!req.file) {
         return res.status(404).send({
             status: "error",
             message: "Peticion no incluye la imagen"
         });
     }
 
-    // Conseguir el nombre del archivo
-    let image = req.file.originalname;
+    // Guardar la ruta del archivo local antes de subir a Cloudinary
+    const filePath = req.file.path;
 
-    // Sacar la extension del archivo
-    const imageSplit = image.split("\.");
-    const extension = imageSplit[1];
-
-    // Comprobar extension
-    if(extension != "png" && extension != "jpg" && extension != "jpeg" && extension != "gif"){
-        const filePath = req.file.path;
-        
-        // Si no es correcto, borrar archivo
-        const fileDelete = fs.unlinkSync(filePath);
-
-        return res.status(400).send({
-            status: "error",
-            message: "La extension de la imagen no es valida"
-        });
-    }
-    
-
-    // Si sí es correcta, guardar imagen en BD
     try {
-        let userUpdated = await User.findOneAndUpdate({_id: req.user.id}, {image: req.file.filename}, {new: true});
+        // Subir imagen a Cloudinary
+        const resultado = await cloudinary.uploader.upload(req.file.path, {
+            folder: "avatars" // Carpeta dentro de Cloudinary
+        });
 
-        // Devolver respuesta
+        // Verificar si el archivo temporal existe antes de eliminarlo
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+
+        // Guardar la URL de la imagen en la base de datos
+        const userUpdated = await User.findOneAndUpdate(
+            { _id: req.user.id },
+            { image: resultado.secure_url },
+            { new: true }
+        );
+
         return res.status(200).send({
             status: "success",
             user: userUpdated,
-            file: req.file,
+            image: resultado.secure_url
         });
-    }
-    catch(error){
+    } 
+    catch (error) {
         return res.status(500).send({
             status: "error",
-            message: "Error en la subida del avatar del usuario!"
+            message: "Error al subir la imagen",
+            error: error.message
         });
     }
 }
 
+const axios = require("axios");
+
 const avatar = async (req, res) => {
 
-    // Sacar el parametro de la URL
-    const file = req.params.file;
+    try{
+        const userId = req.params.idUser;
 
-    // Montar el path real de la imagen
-    const filePath = "./imagenes/avatars/" + file;
+        // Buscar el usuario en la base de datos
+        const user = await User.findById(userId);
 
-    fs.stat(filePath, (error, existe) => {
-        // Comprobar que existe el archivo
-        if (existe) {
-            // Devolver la imagen (un file)
-            return res.sendFile(path.resolve(filePath));
+        if(!user || !user.image){
+            return res.status(404).json({ status: "error", mensaje: "Imagen no encontrada" });
         }
-        else{
-            // si hay algun error 
-            return res.status(404).json({
-                status: "error",
-                mensaje: "La imagen no existe",
-                existe,
-                file,
-                filePath
-            });
-        }
-    });
 
+        // Descargar la imagen desde Cloudinary
+        const response = await axios.get(user.image, { responseType: "arraybuffer" });
+
+        // Lista de formatos admitidos
+        const formatosPermitidos = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+        let contentType = response.headers["content-type"];
+
+        // Si no hay content-type o no es un formato de imagen, asignar un valor predeterminado
+        if (!contentType || !formatosPermitidos.includes(contentType)) {
+            contentType = "image/jpeg"; // Por defecto, JPEG
+        }
+
+        // Configurar encabezado y enviar imagen
+        res.setHeader("Content-Type", contentType);
+        return res.send(response.data);
+    }
+    catch(error){
+        console.error("Error al obtener la imagen:", error.message);
+
+        return res.status(500).json({ 
+            status: "error", 
+            mensaje: "Error al obtener la imagen", 
+            error: error.message 
+        })
+    }
 }
 
 const counters = async (req, res) => {
