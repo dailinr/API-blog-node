@@ -11,10 +11,10 @@ const PORT = process.env.PORT || 3000;
 
 // Configuración de CORS
 const corsOptions = {
-    origin: "*",  // ⚠️ Permite cualquier origen (puedes restringirlo a tu dominio)
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true
+  origin: "*",  // ⚠️ Permite cualquier origen (puedes restringirlo a tu dominio)
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
 };
   
 app.use(cors(corsOptions));
@@ -48,7 +48,7 @@ connectDB();
 
 // Rutas de prueba
 app.get("/", (req, res) => {
-    res.json("Hola");
+  res.json("Hola");
 });
 
 // RUTAS - para visualizar el resultado en el navegador
@@ -65,11 +65,11 @@ app.use("/api/notificaciones", rutas_notis);
 
 // Middleware de manejo de errores
 app.use((err, req, res, next) => {
-    console.error(err);
-    res.status(500).json({ error: err.message });
+  console.error(err);
+  res.status(500).json({ error: err.message });
 });
 
 // Crear servidor y escuchar peticiones http
 app.listen(PORT, () => { // se pasa un puerto como parametro y funcion verifique q el servidor corra
-    console.log("Servidor corriendo en el puerto: " + PORT);
+  console.log("Servidor corriendo en el puerto: " + PORT);
 });
