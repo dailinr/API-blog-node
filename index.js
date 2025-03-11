@@ -8,15 +8,20 @@ console.log("App node arrancada");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const allowedOrigins = [
+  "https://www.tecnopulse.lat",  // Dominio con "www"
+  "https://tecnopulse.lat",      // Dominio sin "www"
+  "http://localhost:3000"        // Para pruebas locales
+];
 
 // Configuración de CORS
 const corsOptions = {
-  origin: "https://tecnopulse.lat",  // ⚠️ Permite cualquier origen (puedes restringirlo a tu dominio)
+  origin: allowedOrigins,  // Usa el array de allowedOrigins
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 };
-  
+
 app.use(cors(corsOptions));
 
 // Convertir body a objeto js
